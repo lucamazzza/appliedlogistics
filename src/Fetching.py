@@ -4,4 +4,6 @@ import streamlit as sl
 import pandas as pd
 import streamlit as st
 
-st.markdown("# Automatic Fetching")
+def load():
+	# title
+	st.markdown("# Fetching")

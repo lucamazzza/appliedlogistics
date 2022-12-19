@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 
-import os
+import streamlit as sl
 import pandas as pd
 import streamlit as st
-import numpy as np
 
-def load():
+def load():	
 	# title
-	st.markdown("# Dashboard")
-
-
-		
+	st.markdown("# Clients")
