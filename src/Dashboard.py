@@ -8,6 +8,7 @@ import numpy as np
 def load():
 	# title
 	st.markdown("# Dashboard")
+	
 
 
 		

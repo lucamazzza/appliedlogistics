@@ -1,42 +1,44 @@
 #!/usr/bin/env python3
 
-import streamlit as sl
-import pandas as pd
-from streamlit_option_menu import option_menu
-
-import Automatic_Fetching as af 
+import Dashboard as d
+import Inventory as i
 import Clients as c
 import Fetching as f
-import Inventory as i
+import Automatic_Fetching as af
 import Tickets as t
-import Dashboard as d
 
-def load():	
-	with sl.sidebar:
-		selected = option_menu("Applied Logistic", ["Dashboard", 'Inventory', 'Clients', 'Fetching', 'Automatic Fetching', 'Tickets'],
-			icons=['speedometer', 'box-seam', "person", 'arrow-down', 'arrow-repeat', 'ticket'],
-			menu_icon="boxes", default_index=0,
-			styles={
-				"container": {"padding": "0!important", "background-color": "transparent"},
-				"icon": {"color": "grey", "font-size": "15px"}, 
-				"nav-link": {"font-size": "15px", "text-align": "left", "margin":"0px", "--hover-color": "#222"},
-				"nav-link-selected": {"background-color": "#111"},
-			})
-	if selected == 'Dashboard':
+from st_on_hover_tabs import on_hover_tabs
+import streamlit as st
+def load():
+	st.markdown('<style>' + open('style.css').read() + '</style>', unsafe_allow_html=True)
+	
+	with st.sidebar:
+		tabs = on_hover_tabs(tabName=["Dashboard", 'Inventory', 'Clients', 'Fetching', 'Automatic Fetching', 'Tickets', 'Logout'], 
+							iconName=['dashboard', 'inventory', 'groups', 'change_circle', 'arrow_circle_down', 'confirmation_number', 'account_circle'], 
+							styles = {
+								'navtab': {'background-color':'#111', 'color': '#818181', 'font-size': '18px', 'transition': '.3s', 'white-space': 'nowrap', 'text-transform': 'uppercase'},
+								'tabOptionsStyle': {':hover :hover': {'color': 'red', 'cursor': 'pointer'}},
+								'iconStyle':{'position':'fixed', 'left':'7.5px', 'text-align': 'left'}, 
+								'tabStyle' : {'list-style-type': 'none', 'margin-bottom': '30px', 'padding-left': '30px'}},
+							default_choice=0)
+		
+	if tabs =='Dashboard':
 		d.load()
 		
-	if selected == 'Inventory':
+	elif tabs == 'Inventory':
 		i.load()
-	
-	if selected == 'Clients':
+		
+	elif tabs == 'Clients':
 		c.load()
 		
-	if selected == 'Fetching':
+	elif tabs == 'Fetching':
 		f.load()
-	
-	if selected == 'Automatic Fetching':
+		
+	elif tabs == 'Automatic Fetching':
 		af.load()
 		
-	if selected == 'Tickets':
+	elif tabs == 'Tickets':
 		t.load()
 		
+	elif tabs == 'Logout':
+		i.load()

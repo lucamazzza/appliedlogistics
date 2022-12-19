@@ -14,7 +14,6 @@ import Sidebar as sb
 #footer {visibility: hidden;}
 #</style> """, unsafe_allow_html=True)
 sl.set_page_config(layout="wide")
-
 sb.load()
 
 	
