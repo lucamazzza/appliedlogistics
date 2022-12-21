@@ -20,7 +20,7 @@ button[kind="header"] {
     /* The navigation menu specs and size */
     section[data-testid='stSidebar'] > div {
         height: 100%;
-        width: 95px;
+        width: 75px;
         position: relative;
         z-index: 1;
         top: 0;
