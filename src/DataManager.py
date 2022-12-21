@@ -10,6 +10,18 @@ from itertools import cycle
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 from itertools import count
 from datetime import datetime
+from pymongo import MongoClient
+
+def get_database(dbname = 'AppliedLogistics'):
+	
+	# Provide the mongodb atlas url to connect python to mongodb using pymongo
+	CONNECTION_STRING = "mongodb+srv://admin:Hus.lmamma04@appliedlogistics.op6cp7l.mongodb.net/test"
+	
+	# Create a connection using MongoClient. You can import MongoClient or use pymongo.MongoClient
+	client = MongoClient(CONNECTION_STRING)
+	
+	# Create the database for our example (we will use the same database throughout the tutorial
+	return client[dbname]
 
 def display_time():
 	st.metric("",datetime.today().strftime("%H:%M:%S"),"")
@@ -38,37 +50,13 @@ def display_table(grid_height = 347, data_amount = 30, return_mode = "FILTERED",
 		
 	
 	
-	df = fetch_data(data_amount)
+	df = fetch_data()
 	
 	#Infer basic colDefs from dataframe types
 	gb = GridOptionsBuilder.from_dataframe(df)
-	
-	#customize gridOptions
 	gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
-	gb.configure_column("date_only", type=["dateColumnFilter","customDateTimeFormat"], custom_format_string='yyyy-MM-dd', pivot=True)
-	gb.configure_column("date_tz_aware", type=["dateColumnFilter","customDateTimeFormat"], custom_format_string='yyyy-MM-dd HH:mm zzz', pivot=True)
-	gb.configure_column("apple", type=["numericColumn","numberColumnFilter","customNumericFormat"], precision=2, aggFunc='sum')
-	gb.configure_column("banana", type=["numericColumn", "numberColumnFilter", "customNumericFormat"], precision=1, aggFunc='avg')
-	gb.configure_column("chocolate", type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="R$", aggFunc='max')
 	
-	#configures last row to use custom styles based on cell's value, injecting JsCode on components front end
-	cellsytle_jscode = JsCode("""
-	function(params) {
-		if (params.value == 'A') {
-			return {
-				'color': 'white',
-				'backgroundColor': 'darkred'
-			}
-		} else {
-			return {
-				'color': 'white',
-				'backgroundColor': 'transparent'
-			}
-		}
-	};
-	""")
-	gb.configure_column("group", cellStyle=cellsytle_jscode)
-	
+		
 	if enable_selection:
 		gb.configure_selection(selection_mode)
 		gb.configure_selection(selection_mode, use_checkbox=True, groupSelectsChildren=groupSelectsChildren, groupSelectsFiltered=groupSelectsFiltered)
@@ -95,17 +83,38 @@ def display_table(grid_height = 347, data_amount = 30, return_mode = "FILTERED",
 	selected = grid_response['selected_rows']
 	selected_df = pd.DataFrame(selected).apply(pd.to_numeric, errors='coerce')
 	
+def configure_table(cols = ["col1", "col2"], types=[["dateColumnFilter", "customDateTimeFormat"], ["numericColumn","numberColumnFilter","customNumericFormat"]]):
+	for c in range(len(cols)):
+		#customize gridOptions
+		gb.configure_column(cols[c], type=types[c], custom_format_string='yyyy-MM-dd', pivot=True)
+		gb.configure_column("date_tz_aware", type=["dateColumnFilter","customDateTimeFormat"], custom_format_string='yyyy-MM-dd HH:mm zzz', pivot=True)
+		gb.configure_column("apple", type=["numericColumn","numberColumnFilter","customNumericFormat"], precision=2, aggFunc='sum')
+		gb.configure_column("banana", type=["numericColumn", "numberColumnFilter", "customNumericFormat"], precision=1, aggFunc='avg')
+		gb.configure_column("chocolate", type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="R$", aggFunc='max')
+		
+	#configures last row to use custom styles based on cell's value, injecting JsCode on components front end
+	cellsytle_jscode = JsCode("""
+	function(params) {
+		if (params.value == 'A') {
+			return {
+				'color': 'white',
+				'backgroundColor': 'darkred'
+			}
+		} else {
+			return {
+				'color': 'white',
+				'backgroundColor': 'transparent'
+			}
+		}
+	};
+	""")
+	gb.configure_column("group", cellStyle=cellsytle_jscode)
+	
 # Data fetching, to be integrated with DB
 @st.cache(allow_output_mutation=True)
 def fetch_data():
-	deltas = cycle([
-			pd.Timedelta(weeks=-2),
-			pd.Timedelta(days=-1),
-			pd.Timedelta(hours=-1),
-			pd.Timedelta(0),
-			pd.Timedelta(minutes=5),
-			pd.Timedelta(seconds=10),
-			pd.Timedelta(microseconds=50),
-			pd.Timedelta(microseconds=10)
-			])
-	return pd.DataFrame(dummy_data)
+	dbname = get_database()
+	collection_name = dbname['clients']
+	items = collection_name.find()
+	items_df = pd.DataFrame(items)
+	return items_df
